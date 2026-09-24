@@ -1,0 +1,35 @@
+services:
+  app:
+{% if app_image %}
+    image: {{ app_image }}
+{% else %}
+    build: ./src
+    image: url-shortener:local
+{% endif %}
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: "{{ app_port }}"
+      JAVA_OPTS: "{{ app_java_opts }}"
+      POSTGRES_URL: jdbc:postgresql://{{ postgres_host }}:{{ postgres_port }}/{{ postgres_db }}
+      POSTGRES_USER: {{ postgres_user }}
+      POSTGRES_PASSWORD: {{ postgres_password | replace('$', '$$') | to_json }}
+      REDIS_HOST: {{ redis_host }}
+      REDIS_PORT: "{{ redis_port }}"
+      TOMCAT_MAX_THREADS: "{{ app_tomcat_max_threads }}"
+      HIKARI_MAX_POOL_SIZE: "{{ app_hikari_max_pool_size }}"
+      HIKARI_MIN_IDLE: "{{ app_hikari_min_idle }}"
+      # Empty value keeps the OpenTelemetry javaagent off (see the app's Dockerfile).
+      OTEL_JAVAAGENT_ENABLED: "{{ 'true' if otel_endpoint else '' }}"
+      OTEL_SERVICE_NAME: url-shortener
+      OTEL_RESOURCE_ATTRIBUTES: host.name={{ inventory_hostname }}
+      OTEL_EXPORTER_OTLP_ENDPOINT: "{{ otel_endpoint }}"
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:{{ app_port }}/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s

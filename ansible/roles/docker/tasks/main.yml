@@ -1,0 +1,31 @@
+- name: Prerequisites
+  apt:
+    name: [ca-certificates, curl, python3-debian]
+    update_cache: true
+
+- name: Docker repository
+  deb822_repository:
+    name: docker
+    types: deb
+    uris: https://download.docker.com/linux/ubuntu
+    suites: "{{ ansible_distribution_release }}"
+    components: stable
+    architectures: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+    signed_by: https://download.docker.com/linux/ubuntu/gpg
+
+- name: Install Docker and compose plugin
+  apt:
+    name: [docker-ce, docker-ce-cli, containerd.io, docker-compose-plugin]
+    update_cache: true
+
+- name: Docker service
+  service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Add user to docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: true

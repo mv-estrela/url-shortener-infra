@@ -1,0 +1,10 @@
+# Set app_image to a registry image (e.g. ghcr.io/mv-estrela/url-shortener:1.0.0)
+# to pull it. Left empty, the image is built on the VM from app_repo@app_version.
+app_image: ""
+app_repo: https://github.com/mv-estrela/url-shortener.git
+app_version: main
+
+app_java_opts: "-XX:MaxRAMPercentage=75.0 -XX:+UseContainerSupport"
+app_tomcat_max_threads: 200
+app_hikari_max_pool_size: 10
+app_hikari_min_idle: 10

@@ -1,0 +1,4 @@
+redis_image: redis:7.4-alpine
+redis_exporter_image: oliver006/redis_exporter:v1.67.0
+# Pure cache: cap memory and evict LRU keys, no persistence.
+redis_maxmemory: 512mb

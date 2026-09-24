@@ -1,0 +1,22 @@
+# Base layer: Docker + node-exporter (host metrics) on every VM.
+- hosts: all
+  become: true
+  roles: [docker, node_exporter]
+
+# Stateful services first so the apps can connect (and run Flyway) on boot.
+- hosts: db
+  become: true
+  roles: [postgres]
+
+- hosts: cache
+  become: true
+  roles: [redis]
+
+- hosts: app
+  become: true
+  roles: [app]
+
+# Load balancer last, once its upstreams are healthy.
+- hosts: lb
+  become: true
+  roles: [nginx]

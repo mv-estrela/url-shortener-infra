@@ -1,0 +1,11 @@
+services:
+  node-exporter:
+    image: {{ node_exporter_image }}
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+    command:
+      - --path.rootfs=/host
+      - --web.listen-address=:{{ node_exporter_port }}
+    volumes:
+      - /:/host:ro,rslave

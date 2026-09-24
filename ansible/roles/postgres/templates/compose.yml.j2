@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: {{ postgres_image }}
+    network_mode: host
+    restart: unless-stopped
+    command:
+      - postgres
+      - -c
+      - port={{ postgres_port }}
+      - -c
+      - max_connections={{ postgres_max_connections }}
+    environment:
+      POSTGRES_DB: {{ postgres_db }}
+      POSTGRES_USER: {{ postgres_user }}
+      POSTGRES_PASSWORD: {{ postgres_password | replace('$', '$$') | to_json }}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -p {{ postgres_port }} -U {{ postgres_user }} -d {{ postgres_db }}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-exporter:
+    image: {{ postgres_exporter_image }}
+    network_mode: host
+    restart: unless-stopped
+    command:
+      - --web.listen-address=:{{ postgres_exporter_port }}
+    environment:
+      DATA_SOURCE_NAME: "postgresql://{{ postgres_user }}:{{ postgres_password | urlencode | replace('$', '$$') }}@127.0.0.1:{{ postgres_port }}/{{ postgres_db }}?sslmode=disable"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

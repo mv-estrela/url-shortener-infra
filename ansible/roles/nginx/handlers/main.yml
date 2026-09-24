@@ -1,0 +1,5 @@
+# The config is bind-mounted, so compose won't notice changes; reload in place.
+- name: Reload nginx
+  command: docker compose exec nginx sh -c "nginx -t -c /etc/nginx/managed/nginx.conf && nginx -s reload -c /etc/nginx/managed/nginx.conf"
+  args:
+    chdir: /opt/nginx

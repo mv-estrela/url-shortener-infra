@@ -1,0 +1,17 @@
+- name: Project directory
+  file:
+    path: /opt/redis
+    state: directory
+    mode: "0755"
+
+- name: Compose file
+  template:
+    src: compose.yml.j2
+    dest: /opt/redis/compose.yml
+    mode: "0644"
+
+- name: Run redis + redis-exporter
+  community.docker.docker_compose_v2:
+    project_src: /opt/redis
+    remove_orphans: true
+    wait: true

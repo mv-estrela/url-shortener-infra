@@ -1,0 +1,4 @@
+nginx_image: nginx:1.27-alpine
+nginx_exporter_image: nginx/nginx-prometheus-exporter:1.4.0
+# stub_status is only exposed on loopback, for the co-located exporter.
+nginx_status_port: 8081

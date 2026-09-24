@@ -1,0 +1,25 @@
+services:
+  nginx:
+    image: {{ nginx_image }}
+    network_mode: host
+    restart: unless-stopped
+    # Directory mount (not a single file) so config updates are visible to a reload.
+    command: ["nginx", "-c", "/etc/nginx/managed/nginx.conf", "-g", "daemon off;"]
+    volumes:
+      - ./conf:/etc/nginx/managed:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/nginx-health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nginx-exporter:
+    image: {{ nginx_exporter_image }}
+    network_mode: host
+    restart: unless-stopped
+    command:
+      - --nginx.scrape-uri=http://127.0.0.1:{{ nginx_status_port }}/nginx_status
+      - --web.listen-address=:{{ nginx_exporter_port }}
+    depends_on:
+      nginx:
+        condition: service_healthy

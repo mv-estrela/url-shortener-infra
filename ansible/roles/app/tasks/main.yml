@@ -1,0 +1,35 @@
+- name: Project directory
+  file:
+    path: /opt/url-shortener
+    state: directory
+    mode: "0750"
+
+- name: Install git
+  apt:
+    name: git
+  when: not app_image
+
+- name: Checkout app source
+  git:
+    repo: "{{ app_repo }}"
+    version: "{{ app_version }}"
+    dest: /opt/url-shortener/src
+  register: app_src
+  when: not app_image
+
+# Contains the DB password, so keep it root-only.
+- name: Compose file
+  template:
+    src: compose.yml.j2
+    dest: /opt/url-shortener/compose.yml
+    mode: "0600"
+
+# Rebuild only when the checked-out source moved; the Maven build is slow on 2 GB VMs.
+- name: Run app
+  community.docker.docker_compose_v2:
+    project_src: /opt/url-shortener
+    build: "{{ 'always' if app_src is changed else 'policy' }}"
+    pull: "{{ 'always' if app_image else 'never' }}"
+    remove_orphans: true
+    wait: true
+    wait_timeout: 300

@@ -1,0 +1,16 @@
+- name: Project directory
+  file:
+    path: /opt/node_exporter
+    state: directory
+    mode: "0755"
+
+- name: Compose file
+  template:
+    src: compose.yml.j2
+    dest: /opt/node_exporter/compose.yml
+    mode: "0644"
+
+- name: Run node-exporter
+  community.docker.docker_compose_v2:
+    project_src: /opt/node_exporter
+    remove_orphans: true
