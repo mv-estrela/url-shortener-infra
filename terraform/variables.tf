@@ -16,7 +16,6 @@ variable "gateway" {
   type = string
 }
 
-variable "ssh_pubkey_path" {
-  type    = string
-  default = "~/.ssh/id_ed25519.pub"
+variable "ssh_pubkey_paths" {
+  type    = list(string)
 }

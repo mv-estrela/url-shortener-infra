@@ -48,7 +48,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
     }
     user_account {
       username = "estrela"
-      keys     = [trimspace(file(pathexpand(var.ssh_pubkey_path)))]
+      keys     = [for p in var.ssh_pubkey_paths : trimspace(file(p))]
     }
   }
 }
